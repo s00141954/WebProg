@@ -1,0 +1,6 @@
+C:\Users\Joe\Desktop\College\Year3\WebProgramming\WebProgAssignment\WebProgAssignmentSol\WebProgAssignment\bin\WebProgAssignment.dll.config
+C:\Users\Joe\Desktop\College\Year3\WebProgramming\WebProgAssignment\WebProgAssignmentSol\WebProgAssignment\bin\WebProgAssignment.dll
+C:\Users\Joe\Desktop\College\Year3\WebProgramming\WebProgAssignment\WebProgAssignmentSol\WebProgAssignment\bin\WebProgAssignment.pdb
+C:\Users\Joe\Desktop\College\Year3\WebProgramming\WebProgAssignment\WebProgAssignmentSol\WebProgAssignment\obj\Debug\WebProgAssignment.csprojResolveAssemblyReference.cache
+C:\Users\Joe\Desktop\College\Year3\WebProgramming\WebProgAssignment\WebProgAssignmentSol\WebProgAssignment\obj\Debug\WebProgAssignment.dll
+C:\Users\Joe\Desktop\College\Year3\WebProgramming\WebProgAssignment\WebProgAssignmentSol\WebProgAssignment\obj\Debug\WebProgAssignment.pdb
