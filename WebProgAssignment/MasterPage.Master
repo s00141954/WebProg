@@ -11,6 +11,9 @@
 <body>
     <form id="form1" runat="server">
     <div>
+         <asp:Button ID="btnLogOut" runat="server" OnClick="btnLogOut_Click" Text="Log Out" CausesValidation="False" />
+        <br />
+        <asp:HyperLink ID="HpDesktop" runat="server" NavigateUrl="~/Users.aspx">My Desktop</asp:HyperLink>
         <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
         
         </asp:ContentPlaceHolder>

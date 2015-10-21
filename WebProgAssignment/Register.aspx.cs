@@ -47,7 +47,7 @@ namespace WebProgAssignment
 
                 com.ExecuteNonQuery();
                 // for testing
-                 Response.Redirect("Users.aspx");
+                 Response.Redirect("LogIn.aspx");
                 //Response.Write("Registration Successful");
 
                 conn.Close();

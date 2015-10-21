@@ -3,7 +3,8 @@
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
     <div id="Registration">
-        <asp:TextBox ID="tbxUserName" placeholder="User Name" runat="server"></asp:TextBox>
+        <asp:Label runat="server" Text="User Name:"></asp:Label>
+        <asp:TextBox ID="tbxUserName" runat="server"></asp:TextBox>
         <asp:RequiredFieldValidator ID="ReqUserName" runat="server" ControlToValidate="tbxUserName" ErrorMessage="UserName is required" ForeColor="Red"></asp:RequiredFieldValidator>
     <br />
         <asp:TextBox ID="tbxEmail" placeholer="Email" runat="server"></asp:TextBox>
