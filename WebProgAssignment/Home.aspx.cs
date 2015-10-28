@@ -10,9 +10,12 @@ using System.Data;
 
 namespace WebProgAssignment
 { 
+    // Check safety file saved on desktop *****************
 
     public partial class Home : System.Web.UI.Page
     {
+        string strConn = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -23,7 +26,7 @@ namespace WebProgAssignment
 
         private void FillFixture()
         {
-            string strConn = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+            
             SqlConnection con = new SqlConnection(strConn);
             // http://csharpdotnetfreak.blogspot.com/2009/03/populate-dropdown-based-selection-other.html
 
@@ -42,7 +45,7 @@ namespace WebProgAssignment
             {
                 ddlFixture1.DataSource = objDs.Tables[0];
                 ddlFixture1.DataTextField = "FixtureId";
-                ddlFixture1.DataValueField = "HTeamName AND ATeamName";
+                ddlFixture1.DataValueField = "HTeamName";
                 ddlFixture1.DataBind();
                 ddlFixture1.Items.Insert(0, "--Select Fixture--");
             }
@@ -63,12 +66,10 @@ namespace WebProgAssignment
         {
             string strConn = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
             SqlConnection con = new SqlConnection(strConn);
-            SqlCommand cmd = new SqlCommand("SELECT PlayerName FROM PlayerTbl WHERE TeamName = @HTeamName OR TeamName = @ATeamName",con);
+            SqlCommand cmd = new SqlCommand("SELECT PlayerName FROM PlayerTbl WHERE TeamName = @HTeamName",con);
            
             cmd.CommandType = CommandType.Text;
-            //cmd.CommandText = "SELECT PlayerName FROM PlayerTbl WHERE TeamName = @HTeamName";
             cmd.Parameters.AddWithValue("@HTeamName", HTeamName);
-            //cmd.Parameters.AddWithValue("@ATeamName", ATeamName);
             DataSet objDs = new DataSet();
             SqlDataAdapter dAdapter = new SqlDataAdapter();
             dAdapter.SelectCommand = cmd;
@@ -87,6 +88,30 @@ namespace WebProgAssignment
             {
                 lblFor2.Text = "No players found";
             }
+        }
+
+        protected void btnPlaceBet_Click(object sender, EventArgs e)
+        {
+            // Take UserName and betting values and store into BetTbl, using @BetTime to seperate current and past bets
+
+            string betTime = DateTime.Now.ToLongTimeString();
+
+            // connect, execute command, process results
+            SqlConnection con = new SqlConnection(strConn);
+            con.Open();
+
+            string insertQuery = "insert into BetTbl (BetTime,UserName,PlayerName,PlayerTeam) values (@BetTime, @UserName, @PlayerName, @PlayerTeam)";
+            SqlCommand com = new SqlCommand(insertQuery, con);
+            com.Parameters.AddWithValue("@BetTime", betTime);
+            com.Parameters.AddWithValue("@UserName", (string)Session["UserName"]);
+            com.Parameters.AddWithValue("@PlayerName", ddlPlayer1.SelectedValue);
+            com.Parameters.AddWithValue("@PlayerTeam", ddlFixture1.SelectedValue);
+
+            com.ExecuteNonQuery();
+
+            // Keep at bottom *******************
+            Session.Add("BetTime", betTime);
+            Response.Redirect("ViewResults.aspx");
         }
     }
 }

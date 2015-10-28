@@ -34,9 +34,11 @@ namespace WebProgAssignment
 
                 if (password == tbxPassword.Text)
                 {
+                    string UserName = tbxUserName.Text;
                     Session["New"] = tbxUserName.Text;
+                    Session.Add("UserName", UserName);
                     //Response.Write("Password is correct");
-                    Response.Redirect("Users.aspx");
+                    Response.Redirect("Home.aspx");
                 }
                 else
                 {

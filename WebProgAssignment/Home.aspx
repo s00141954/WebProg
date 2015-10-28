@@ -29,6 +29,7 @@
     <asp:DropDownList ID="ddlFixture6" runat="server"></asp:DropDownList>
     <asp:DropDownList ID="ddlPlayer6" runat="server"></asp:DropDownList>
     <br />
+    <asp:Button ID="btnPlaceBet" runat="server" Text="Place Bet" OnClick="btnPlaceBet_Click" />
 <%--    <asp:SqlDataSource ID="SqlDataSourceFixtures" 
         runat="server" 
         ConnectionString="<%$ ConnectionStrings:ConnectionString %>"  

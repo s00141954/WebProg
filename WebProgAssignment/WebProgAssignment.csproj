@@ -75,6 +75,7 @@
     <Content Include="LogIn.aspx" />
     <Content Include="Register.aspx" />
     <Content Include="Users.aspx" />
+    <Content Include="ViewResults.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +114,13 @@
     </Compile>
     <Compile Include="Users.aspx.designer.cs">
       <DependentUpon>Users.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="ViewResults.aspx.cs">
+      <DependentUpon>ViewResults.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="ViewResults.aspx.designer.cs">
+      <DependentUpon>ViewResults.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <PropertyGroup>

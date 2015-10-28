@@ -16,3 +16,9 @@ C:\Users\Joe\Desktop\Safety\WebProgAssignmentSol\WebProgAssignment\bin\WebProgAs
 C:\Users\Joe\Desktop\Safety\WebProgAssignmentSol\WebProgAssignment\obj\Debug\WebProgAssignment.csprojResolveAssemblyReference.cache
 C:\Users\Joe\Desktop\Safety\WebProgAssignmentSol\WebProgAssignment\obj\Debug\WebProgAssignment.dll
 C:\Users\Joe\Desktop\Safety\WebProgAssignmentSol\WebProgAssignment\obj\Debug\WebProgAssignment.pdb
+C:\Users\Joe\Documents\GitHub\WebProg\WebProg\WebProgAssignment\bin\WebProgAssignment.dll.config
+C:\Users\Joe\Documents\GitHub\WebProg\WebProg\WebProgAssignment\bin\WebProgAssignment.dll
+C:\Users\Joe\Documents\GitHub\WebProg\WebProg\WebProgAssignment\bin\WebProgAssignment.pdb
+C:\Users\Joe\Documents\GitHub\WebProg\WebProg\WebProgAssignment\obj\Debug\WebProgAssignment.csprojResolveAssemblyReference.cache
+C:\Users\Joe\Documents\GitHub\WebProg\WebProg\WebProgAssignment\obj\Debug\WebProgAssignment.dll
+C:\Users\Joe\Documents\GitHub\WebProg\WebProg\WebProgAssignment\obj\Debug\WebProgAssignment.pdb
