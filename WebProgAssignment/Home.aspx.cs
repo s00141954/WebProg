@@ -4,114 +4,412 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
+// Added namespace
 using System.Configuration;
 using System.Data.SqlClient;
 using System.Data;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace WebProgAssignment
-{ 
-    // Check safety file saved on desktop *****************
+{
+    // This class is used to seperate fixtures for different weeks
+    static class DateTimeExtensions
+    {
+        static GregorianCalendar gc = new GregorianCalendar();
+
+        public static int GetWeekOfMonth(this DateTime time)
+        {
+            DateTime first = new DateTime(time.Year, time.Month, 1);
+            return time.GetWeekOfYear() - first.GetWeekOfYear() + 1;
+        }
+
+        static int GetWeekOfYear(this DateTime time)
+        {
+            return gc.GetWeekOfYear(time, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+        }
+    }
 
     public partial class Home : System.Web.UI.Page
     {
-        string strConn = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+        // These collections of fixtures and teams will be filled in later
+        // These teams are part of the fixures
+        private static List<Fixture> fixtures = new List<Fixture>();
+        private static List<Fixture> tempFixtures = new List<Fixture>();
+        private static List<Team> teams = new List<Team>();
+        private static List<Bet> bets = new List<Bet>();
 
+
+        // SQL
+        static string strConn = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
+        SqlCommand command = new SqlCommand();
+        SqlConnection connection = new SqlConnection(strConn);
+
+       
         protected void Page_Load(object sender, EventArgs e)
         {
+            //string betTime = System.DateTime.Now.ToString();
+            //const DateTime betTime = System.DateTime.Now();
+            if (Session["BetTime"] == null)
+            {
+                string betTime = System.DateTime.Now.ToString();
+                Session.Add("BetTime", betTime);
+            }
+
             if (!IsPostBack)
             {
-                FillFixture();
+                GetFixtures();
+                CreateTeams();
             }
         }
 
-        private void FillFixture()
+        private void GetFixtures()
         {
+            DateTime time = DateTime.Now;
+            int thisWeek = Convert.ToInt16(time.GetWeekOfMonth());
+            /* Select all fixtures from FixtureTbl and create a class for each fixture */
             
-            SqlConnection con = new SqlConnection(strConn);
-            // http://csharpdotnetfreak.blogspot.com/2009/03/populate-dropdown-based-selection-other.html
+            connection.Open();
+            command.Connection = connection;
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandText = "GetFixtures";
 
-            SqlCommand cmd = new SqlCommand();
-            cmd.Connection = con;
-            cmd.CommandType = CommandType.Text;
-            cmd.CommandText = "SELECT FixtureId, HTeamName, ATeamName FROM FixtureTbl";
-            DataSet objDs = new DataSet();
-            SqlDataAdapter dAdapter = new SqlDataAdapter();
-            dAdapter.SelectCommand = cmd;
-            con.Open();
-            dAdapter.Fill(objDs);
-            con.Close();
-            if (objDs.Tables[0].Rows.Count > 0)
+            var reader = command.ExecuteReader();
 
+            while (reader.Read())
             {
-                ddlFixture1.DataSource = objDs.Tables[0];
-                ddlFixture1.DataTextField = "FixtureId";
-                ddlFixture1.DataValueField = "HTeamName";
-                ddlFixture1.DataBind();
-                ddlFixture1.Items.Insert(0, "--Select Fixture--");
+                Fixture fix = new Fixture()
+                {
+                    FixtureId = Convert.ToInt32(reader["FixtureId"]),
+                    GameWeek = Convert.ToInt16(reader["GameWeek"]),
+                    HTeamID = Convert.ToInt32(reader["HTeamId"]),
+                    ATeamID = Convert.ToInt32(reader["ATeamId"])
+                };
+                tempFixtures.Add(fix);
             }
-            else
+
+            reader.Close();
+            connection.Close();
+
+            //http://stackoverflow.com/questions/2136487/calculate-week-of-month-in-net/2136549#2136549
+
+            foreach (Fixture fix in tempFixtures)
             {
-                lblFor1.Text = "No Fixtures found";
+                if (fix.GameWeek == thisWeek)
+                {
+                    fixtures.Add(fix);
+                }
             }
-            lblFor2.Text = ddlFixture1.DataValueField.ToString();
+        }// End GetFixtures()
+
+        private void CreateTeams()
+        {
+            foreach (var fix in fixtures)
+            {
+                // Delegate and method are in the Utilities class
+                ReturnTeamName teamNameDelegate = Utilities.GetTeamName;
+                var hTeamName = teamNameDelegate(fix.HTeamID);
+                var aTeamName = teamNameDelegate(fix.ATeamID);
+
+                Team hTeam = new Team()
+                {
+                    TeamId = fix.HTeamID,
+                    Name = hTeamName
+                };
+
+                Team aTeam = new Team()
+                {
+                    TeamId = fix.ATeamID,
+                    Name = aTeamName
+                };
+
+                hTeam.Players = GetTeamPlayers(fix.HTeamID);
+                aTeam.Players = GetTeamPlayers(fix.ATeamID);
+
+                teams.Add(hTeam);
+                teams.Add(aTeam);
+
+                ddlFixture1.Items.Add(new ListItem(hTeam.Name + " v " + aTeam.Name, fix.FixtureId.ToString()));
+                ddlFixture2.Items.Add(new ListItem(hTeam.Name + " v " + aTeam.Name, fix.FixtureId.ToString()));
+                ddlFixture3.Items.Add(new ListItem(hTeam.Name + " v " + aTeam.Name, fix.FixtureId.ToString()));
+                ddlFixture4.Items.Add(new ListItem(hTeam.Name + " v " + aTeam.Name, fix.FixtureId.ToString()));
+                ddlFixture5.Items.Add(new ListItem(hTeam.Name + " v " + aTeam.Name, fix.FixtureId.ToString()));
+                ddlFixture6.Items.Add(new ListItem(hTeam.Name + " v " + aTeam.Name, fix.FixtureId.ToString()));
+            }
+        }// End CreateTeams()
+
+        private List<Player> GetTeamPlayers(int teamId)
+        {
+            List<Player> players = new List<Player>();
+            
+            connection.Open();
+
+            command.Connection = connection;
+            command.Parameters.Clear();
+            command.CommandType = CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("@TeamId", teamId);
+            command.CommandText = "GetTeamPlayers";
+
+            var reader = command.ExecuteReader();
+
+            while (reader.Read())
+            {
+                Player player = new Player()
+                {
+                    PlayerId = Convert.ToInt32(reader["PlayerId"]),
+                    PlayerName = reader["PlayerName"].ToString()
+                };
+                players.Add(player);
+            }
+            reader.Close();
+            connection.Close();
+
+            return players;
         }
+
 
         protected void ddlFixture1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string HTeamName = ddlFixture1.SelectedValue.ToString();
-            FillPlayers(HTeamName);
+            int fixtureId = Convert.ToInt32((ddlFixture1.SelectedItem as ListItem).Value);
+
+            Fixture fixture = (from f in fixtures where f.FixtureId == fixtureId select f).First();
+            Team home = (from t in teams where t.TeamId == fixture.HTeamID select t).First();
+            Team away = (from t in teams where t.TeamId == fixture.ATeamID select t).First();
+
+            foreach (Player p in home.Players)
+            {
+                ddlPlayer1.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+            foreach (Player p in away.Players)
+            {
+                ddlPlayer1.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
         }
 
-        private void FillPlayers(string HTeamName)
+        // The following 5 methods are identical to the one
+        // above in order to fill players in the appropriate
+        // drop down lists
+        #region Fill Players
+        protected void ddlFixture2_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string strConn = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
-            SqlConnection con = new SqlConnection(strConn);
-            SqlCommand cmd = new SqlCommand("SELECT PlayerName FROM PlayerTbl WHERE TeamName = @HTeamName",con);
-           
-            cmd.CommandType = CommandType.Text;
-            cmd.Parameters.AddWithValue("@HTeamName", HTeamName);
-            DataSet objDs = new DataSet();
-            SqlDataAdapter dAdapter = new SqlDataAdapter();
-            dAdapter.SelectCommand = cmd;
-            con.Open();
-            dAdapter.Fill(objDs);
-            con.Close();
-            if (objDs.Tables[0].Rows.Count >  0)
+            int fixtureId = Convert.ToInt32((ddlFixture2.SelectedItem as ListItem).Value);
+
+            Fixture fixture = (from f in fixtures where f.FixtureId == fixtureId select f).First();
+            Team home = (from t in teams where t.TeamId == fixture.HTeamID select t).First();
+            Team away = (from t in teams where t.TeamId == fixture.ATeamID select t).First();
+
+            foreach (Player p in home.Players)
             {
-                ddlPlayer1.DataSource = objDs.Tables[0];
-                ddlPlayer1.DataTextField = "PlayerName";
-                ddlPlayer1.DataValueField = "PlayerName";
-                ddlPlayer1.DataBind();
-                ddlPlayer1.Items.Insert(0, "--Select Player--");
+                ddlPlayer2.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
             }
-            else
+            foreach (Player p in away.Players)
             {
-                lblFor2.Text = "No players found";
+                ddlPlayer2.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
             }
         }
 
+        protected void ddlFixture3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int fixtureId = Convert.ToInt32((ddlFixture3.SelectedItem as ListItem).Value);
+
+            Fixture fixture = (from f in fixtures where f.FixtureId == fixtureId select f).First();
+            Team home = (from t in teams where t.TeamId == fixture.HTeamID select t).First();
+            Team away = (from t in teams where t.TeamId == fixture.ATeamID select t).First();
+
+            foreach (Player p in home.Players)
+            {
+                ddlPlayer3.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+            foreach (Player p in away.Players)
+            {
+                ddlPlayer3.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+        }
+
+        protected void ddlFixture4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int fixtureId = Convert.ToInt32((ddlFixture4.SelectedItem as ListItem).Value);
+
+            Fixture fixture = (from f in fixtures where f.FixtureId == fixtureId select f).First();
+            Team home = (from t in teams where t.TeamId == fixture.HTeamID select t).First();
+            Team away = (from t in teams where t.TeamId == fixture.ATeamID select t).First();
+
+            foreach (Player p in home.Players)
+            {
+                ddlPlayer4.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+            foreach (Player p in away.Players)
+            {
+                ddlPlayer4.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+        }
+
+        protected void ddlFixture5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int fixtureId = Convert.ToInt32((ddlFixture5.SelectedItem as ListItem).Value);
+
+            Fixture fixture = (from f in fixtures where f.FixtureId == fixtureId select f).First();
+            Team home = (from t in teams where t.TeamId == fixture.HTeamID select t).First();
+            Team away = (from t in teams where t.TeamId == fixture.ATeamID select t).First();
+
+            foreach (Player p in home.Players)
+            {
+                ddlPlayer5.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+            foreach (Player p in away.Players)
+            {
+                ddlPlayer5.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+        }
+
+        protected void ddlFixture6_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int fixtureId = Convert.ToInt32((ddlFixture6.SelectedItem as ListItem).Value);
+
+            Fixture fixture = (from f in fixtures where f.FixtureId == fixtureId select f).First();
+            Team home = (from t in teams where t.TeamId == fixture.HTeamID select t).First();
+            Team away = (from t in teams where t.TeamId == fixture.ATeamID select t).First();
+
+            foreach (Player p in home.Players)
+            {
+                ddlPlayer6.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+            foreach (Player p in away.Players)
+            {
+                ddlPlayer6.Items.Add(new ListItem(p.PlayerName, p.PlayerId.ToString()));
+            }
+        }
+        #endregion
+
+
+        protected void ddlPlayer1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Bet bet = new Bet();
+            {
+                bet.FixtureId = Convert.ToInt16(ddlFixture1.SelectedValue);
+
+                // This bet time is used to tell the difference between past and present bets
+                // It is declared in the class above with the list items at the top of the page
+                //bet.BetTime = betTime;
+                bet.BetTime = (string)(Session["BetTime"]);
+                bet.User = (string)(Session["User"]);
+                bet.PlayerId = ddlPlayer1.SelectedValue;
+
+                bets.Add(bet);
+            }
+        }
+
+        // The following 5 methods are identical to the one above
+        // in order to save each selection as a bet object
+        #region Save As Bets
+        protected void ddlPlayer2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Bet bet = new Bet();
+            {
+                bet.FixtureId = Convert.ToInt16(ddlFixture2.SelectedValue);
+                bet.BetTime = (string)(Session["BetTime"]);
+                bet.User = (string)(Session["User"]);
+                bet.PlayerId = ddlPlayer2.SelectedValue;
+
+                bets.Add(bet);
+            }
+        }
+
+        protected void ddlPlayer3_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Bet bet = new Bet();
+            {
+                bet.FixtureId = Convert.ToInt16(ddlFixture3.SelectedValue);
+                bet.BetTime = (string)(Session["BetTime"]);
+                bet.User = (string)(Session["User"]);
+                bet.PlayerId = ddlPlayer3.SelectedValue;
+
+                bets.Add(bet);
+            }
+        }
+
+        protected void ddlPlayer4_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Bet bet = new Bet();
+            {
+                bet.FixtureId = Convert.ToInt16(ddlFixture4.SelectedValue);
+                bet.BetTime = (string)(Session["BetTime"]);
+                bet.User = (string)(Session["User"]);
+                bet.PlayerId = ddlPlayer4.SelectedValue;
+
+                bets.Add(bet);
+            }
+        }
+
+        protected void ddlPlayer5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Bet bet = new Bet();
+            {
+                bet.FixtureId = Convert.ToInt16(ddlFixture5.SelectedValue);
+                bet.BetTime = (string)(Session["BetTime"]);
+                bet.User = (string)(Session["User"]);
+                bet.PlayerId = ddlPlayer5.SelectedValue;
+
+                bets.Add(bet);
+            }
+        }
+
+        protected void ddlPlayer6_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Bet bet = new Bet();
+            {
+                bet.FixtureId = Convert.ToInt16(ddlFixture6.SelectedValue);
+                bet.BetTime = (string)(Session["BetTime"]);
+                bet.User = (string)(Session["User"]);
+                bet.PlayerId = ddlPlayer6.SelectedValue;
+
+                bets.Add(bet);
+            }
+        }
+        #endregion
+
+        // Go through each bet and save them to the database
+        // The DateTime is used to seperate current and past bets
         protected void btnPlaceBet_Click(object sender, EventArgs e)
         {
-            // Take UserName and betting values and store into BetTbl, using @BetTime to seperate current and past bets
 
-            string betTime = DateTime.Now.ToLongTimeString();
+            connection.Open();
+            command.Connection = connection;
+            command.CommandType = CommandType.StoredProcedure;
 
-            // connect, execute command, process results
-            SqlConnection con = new SqlConnection(strConn);
-            con.Open();
+            command.CommandText = "InsertBets";
 
-            string insertQuery = "insert into BetTbl (BetTime,UserName,PlayerName,PlayerTeam) values (@BetTime, @UserName, @PlayerName, @PlayerTeam)";
-            SqlCommand com = new SqlCommand(insertQuery, con);
-            com.Parameters.AddWithValue("@BetTime", betTime);
-            com.Parameters.AddWithValue("@UserName", (string)Session["UserName"]);
-            com.Parameters.AddWithValue("@PlayerName", ddlPlayer1.SelectedValue);
-            com.Parameters.AddWithValue("@PlayerTeam", ddlFixture1.SelectedValue);
+            command.Parameters.Add("@FixtureId", SqlDbType.Int);
+            command.Parameters.Add("@BetTime", SqlDbType.VarChar);
+            command.Parameters.Add("@UserName", SqlDbType.NVarChar);
+            command.Parameters.Add("@PlayerId", SqlDbType.Int);
 
-            com.ExecuteNonQuery();
+            foreach (Bet bet in bets)
+            {
+                command.Parameters["@FixtureId"].Value = bet.FixtureId;
+                command.Parameters["@BetTime"].Value = bet.BetTime;
+                command.Parameters["@UserName"].Value = bet.User;
+                command.Parameters["@PlayerId"].Value = bet.PlayerId;
 
-            // Keep at bottom *******************
-            Session.Add("BetTime", betTime);
+                command.ExecuteNonQuery();
+            }
+
+            bets.Clear();
+
+            connection.Close();
             Response.Redirect("ViewResults.aspx");
         }
+
+
+        //public static int GetWeekOfMonth(this DateTime time)
+        //{
+        //    DateTime first = new DateTime(time.Year, time.Month, 1);
+        //    return time.GetWeekOfYear() - first.GetWeekOfYear() + 1;
+        //}
+
+        //public static int GetWeekOfYear(this DateTime time)
+        //{
+        //    return gc.GetWeekOfYear(time, CalendarWeekRule.FirstDay, DayOfWeek.Monday);
+        //}
     }
 }

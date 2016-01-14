@@ -11,7 +11,7 @@ namespace WebProgAssignment
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Session["New"] == null)
+            if (Session["User"] == null)
             {
                 btnLogOut.Text = "Log In";
             }
@@ -19,7 +19,7 @@ namespace WebProgAssignment
 
         protected void btnLogOut_Click(object sender, EventArgs e)
         {
-            if (Session["New"] != null)
+            if (Session["User"] != null)
             {
                 Session.Abandon();
                 Response.Redirect("LogIn.aspx");

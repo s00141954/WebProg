@@ -13,6 +13,15 @@ namespace WebProgAssignment {
     public partial class Register {
         
         /// <summary>
+        /// lblUserName control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblUserName;
+        
+        /// <summary>
         /// tbxUserName control.
         /// </summary>
         /// <remarks>
@@ -29,6 +38,15 @@ namespace WebProgAssignment {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator ReqUserName;
+        
+        /// <summary>
+        /// lblEmail control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEmail;
         
         /// <summary>
         /// tbxEmail control.
@@ -58,6 +76,15 @@ namespace WebProgAssignment {
         protected global::System.Web.UI.WebControls.RegularExpressionValidator RegExEmail;
         
         /// <summary>
+        /// lblPassword control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblPassword;
+        
+        /// <summary>
         /// tbxPassword control.
         /// </summary>
         /// <remarks>
@@ -74,6 +101,15 @@ namespace WebProgAssignment {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator ReqPassword;
+        
+        /// <summary>
+        /// lblConfirmPassword control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblConfirmPassword;
         
         /// <summary>
         /// tbxConfirmPassword control.
@@ -103,6 +139,15 @@ namespace WebProgAssignment {
         protected global::System.Web.UI.WebControls.CompareValidator CompValEmail;
         
         /// <summary>
+        /// lblDOB control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblDOB;
+        
+        /// <summary>
         /// tbxDOB control.
         /// </summary>
         /// <remarks>
@@ -119,6 +164,15 @@ namespace WebProgAssignment {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator ReqDOB;
+        
+        /// <summary>
+        /// lblContactNum control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblContactNum;
         
         /// <summary>
         /// tbxContactNum control.
@@ -155,5 +209,14 @@ namespace WebProgAssignment {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnReset;
+        
+        /// <summary>
+        /// lblError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblError;
     }
 }

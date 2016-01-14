@@ -3,5 +3,7 @@
     
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    <asp:Label ID="lblTest" runat="server"></asp:Label>
+    <asp:GridView ID="gvPlacedBets" runat="server"></asp:GridView>
+    <br />
+    <asp:GridView ID="gvCorrectBets" runat="server"></asp:GridView>
 </asp:Content>

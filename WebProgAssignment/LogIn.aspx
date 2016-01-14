@@ -12,4 +12,6 @@
     <asp:RequiredFieldValidator ID="ValReqPasswordLogIn" runat="server" ControlToValidate="tbxPassword" ErrorMessage="Please Enter your Password" ForeColor="Red"></asp:RequiredFieldValidator>
     <br />
     <asp:Button ID="btnLogIn" runat="server" Text="Log In" OnClick="btnLogIn_Click" />
+    <br />
+    <asp:Label ID="lblError" runat="server"></asp:Label>
 </asp:Content>
